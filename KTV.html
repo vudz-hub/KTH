@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Kiểm Tra</title>
+    <style>
+        :root {
+            --color-background: #fcfcf9;
+            --color-surface: #fffffe;
+            --color-text: #13343b;
+            --color-text-secondary: #626c71;
+            --color-primary: #218d8d;
+            --color-primary-hover: #1d747e;
+            --color-border: rgba(94, 82, 64, 0.2);
+            --color-error: #c0152f;
+            --color-success: #218d8d;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-background: #1f2121;
+                --color-surface: #262828;
+                --color-text: #f5f5f5;
+                --color-text-secondary: #a7a9a9;
+                --color-primary: #32b8c6;
+                --color-primary-hover: #2da6b2;
+                --color-border: rgba(119, 124, 124, 0.3);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-background);
+            color: var(--color-text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--color-surface);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px 20px;
+            background: var(--color-surface);
+            border: 2px solid var(--color-border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .tab:hover {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .tab.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--color-surface);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--color-text);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            background: var(--color-background);
+            color: var(--color-text);
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--color-text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-text);
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: rgba(33, 141, 141, 0.15);
+            color: var(--color-success);
+            border: 1px solid var(--color-success);
+        }
+
+        .message.error {
+            background: rgba(192, 21, 47, 0.15);
+            color: var(--color-error);
+            border: 1px solid var(--color-error);
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .submission-card {
+            background: var(--color-background);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--color-border);
+        }
+
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .submission-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .submission-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: rgba(168, 75, 47, 0.15);
+            color: #a84b2f;
+        }
+
+        .status-graded {
+            background: rgba(33, 141, 141, 0.15);
+            color: var(--color-success);
+        }
+
+        .answer-section {
+            margin-bottom: 15px;
+        }
+
+        .answer-label {
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .answer-content {
+            padding: 10px;
+            background: var(--color-surface);
+            border-radius: 6px;
+            border-left: 3px solid var(--color-primary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .grading-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .grading-inputs {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .score-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 10px;
+        }
+
+        .comment-display {
+            padding: 10px;
+            background: var(--color-background);
+            border-radius: 6px;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .question-header {
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .grading-inputs {
+                grid-template-columns: 1fr;
+            }
+
+            .submission-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Hệ Thống Kiểm Tra</h1>
+            <p style="color: var(--color-text-secondary);">Bài kiểm tra III. Tư Luận</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('student')">📝 Làm Bài</div>
+            <div class="tab" onclick="switchTab('teacher')">👨‍🏫 Chấm Bài</div>
+            <div class="tab" onclick="switchTab('results')">📊 Xem Điểm</div>
+        </div>
+
+        <!-- Tab 1: Student Submission -->
+        <div id="student-tab" class="tab-content active">
+            <h2 style="margin-bottom: 20px;">Nộp Bài Làm</h2>
+            
+            <div id="student-message" class="message"></div>
+
+            <div class="form-group">
+                <label for="student-name">Họ và tên: *</label>
+                <input type="text" id="student-name" placeholder="Nhập họ tên của bạn" required>
+            </div>
+
+            <div class="form-group">
+                <label class="question-header">Câu 1: Dẫn 4,958 lít (ở đktc) hỗn hợp khí methane và ethylene đi qua bình đựng dung dịch bromine dư thấy có 8 gam bromine đã phản ứng. Tính thành phần phần trăm về thể tích các khí trong hỗn hợp trên.</label>
+                <textarea id="answer-1" placeholder="Nhập lời giải Câu 1..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="question-header">Bài 2. Đốt cháy hoàn toàn 1,46 kg hỗn hợp A gồm C₄H₁₀ và C₃H₈ có tỉ lệ về thể tích là 1 : 2.
+a) Viết PTHH của phản ứng đốt cháy các alkane trên.
+b) Tính khối lượng mỗi alkane trong hỗn hợp A.
+c) Tính nhiệt lượng tỏa ra trong quá trình trên, biết lượng nhiệt tỏa ra khi đốt cháy hoàn toàn 1 gam mỗi chất C₄H₁₀ và C₃H₈ lần lượt là 49,5 kJ và 50,35 kJ.</label>
+                <textarea id="answer-2" placeholder="Nhập lời giải Bài 2..." required></textarea>
+            </div>
+
+            <button class="btn" onclick="submitTest()">Nộp Bài</button>
+        </div>
+
+        <!-- Tab 2: Teacher Grading -->
+        <div id="teacher-tab" class="tab-content">
+            <h2 style="margin-bottom: 20px;">Chấm Bài</h2>
+            
+            <div id="auth-section">
+                <div class="form-group">
+                    <label for="teacher-password">Mật khẩu: *</label>
+                    <input type="password" id="teacher-password" placeholder="Nhập mật khẩu">
+                </div>
+                <button class="btn" onclick="authenticate()">Đăng Nhập</button>
+            </div>
+
+            <div id="grading-section" style="display: none;">
+                <div id="teacher-message" class="message"></div>
+                <div id="submissions-list"></div>
+            </div>
+        </div>
+
+        <!-- Tab 3: Results View -->
+        <div id="results-tab" class="tab-content">
+            <h2 style="margin-bottom: 20px;">Kết Quả Kiểm Tra</h2>
+            <div id="results-message" class="message"></div>
+            <div id="results-list"></div>
+        </div>
+    </div>
+
+    <script>
+        const FIREBASE_URL = 'https://burnt-hand-default-rtdb.firebaseio.com/submissions.json';
+        const PASSWORD = 'vudangcap';
+        let isAuthenticated = false;
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+
+            if (tabName === 'results') {
+                loadResults();
+            } else if (tabName === 'teacher' && isAuthenticated) {
+                loadSubmissions();
+            }
+        }
+
+        function showMessage(elementId, message, type) {
+            const msgElement = document.getElementById(elementId);
+            msgElement.textContent = message;
+            msgElement.className = 'message ' + type + ' show';
+            setTimeout(() => {
+                msgElement.classList.remove('show');
+            }, 5000);
+        }
+
+        async function submitTest() {
+            const name = document.getElementById('student-name').value.trim();
+            const answer1 = document.getElementById('answer-1').value.trim();
+            const answer2 = document.getElementById('answer-2').value.trim();
+
+            if (!name || !answer1 || !answer2) {
+                showMessage('student-message', 'Vui lòng điền đầy đủ thông tin!', 'error');
+                return;
+            }
+
+            const submission = {
+                name: name,
+                answer1: answer1,
+                answer2: answer2,
+                timestamp: new Date().toISOString(),
+                score: null,
+                comment: null
+            };
+
+            try {
+                const response = await fetch(FIREBASE_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(submission)
+                });
+
+                if (response.ok) {
+                    showMessage('student-message', 'Nộp bài thành công! ✓', 'success');
+                    document.getElementById('student-name').value = '';
+                    document.getElementById('answer-1').value = '';
+                    document.getElementById('answer-2').value = '';
+                } else {
+                    showMessage('student-message', 'Có lỗi xảy ra. Vui lòng thử lại!', 'error');
+                }
+            } catch (error) {
+                showMessage('student-message', 'Không thể kết nối đến server!', 'error');
+            }
+        }
+
+        function authenticate() {
+            const password = document.getElementById('teacher-password').value;
+            
+            if (password === PASSWORD) {
+                isAuthenticated = true;
+                document.getElementById('auth-section').style.display = 'none';
+                document.getElementById('grading-section').style.display = 'block';
+                loadSubmissions();
+            } else {
+                alert('Mật khẩu không chính xác!');
+            }
+        }
+
+        async function loadSubmissions() {
+            const listElement = document.getElementById('submissions-list');
+            listElement.innerHTML = '<div class="loading">Đang tải bài làm...</div>';
+
+            try {
+                const response = await fetch(FIREBASE_URL.replace('.json', '/.json'));
+                const data = await response.json();
+
+                if (!data) {
+                    listElement.innerHTML = '<p style="text-align: center; color: var(--color-text-secondary);">Chưa có bài làm nào.</p>';
+                    return;
+                }
+
+                listElement.innerHTML = '';
+                
+                for (const [id, submission] of Object.entries(data)) {
+                    const card = createSubmissionCard(id, submission);
+                    listElement.appendChild(card);
+                }
+            } catch (error) {
+                listElement.innerHTML = '<p style="color: var(--color-error);">Không thể tải dữ liệu!</p>';
+            }
+        }
+
+        function createSubmissionCard(id, submission) {
+            const card = document.createElement('div');
+            card.className = 'submission-card';
+            card.setAttribute('data-id', id);
+            
+            const isGraded = submission.score !== null && submission.score !== undefined;
+            
+            card.innerHTML = `
+                <div class="submission-header">
+                    <div class="submission-name">${submission.name}</div>
+                    <div class="submission-status ${isGraded ? 'status-graded' : 'status-pending'}">
+                        ${isGraded ? '✓ Đã chấm' : '⏳ Chờ chấm'}
+                    </div>
+                </div>
+                
+                <div class="answer-section">
+                    <div class="answer-label">Câu 1:</div>
+                    <div class="answer-content">${submission.answer1}</div>
+                </div>
+                
+                <div class="answer-section">
+                    <div class="answer-label">Bài 2:</div>
+                    <div class="answer-content">${submission.answer2}</div>
+                </div>
+                
+                ${isGraded ? `
+                    <div class="grading-section">
+                        <div class="score-display">Điểm: ${submission.score}</div>
+                        <div class="comment-display">${submission.comment}</div>
+                        <button class="btn btn-secondary" style="margin-top: 10px;" onclick="editSubmission('${id}')">Chỉnh Sửa Điểm</button>
+                    </div>
+                ` : `
+                    <div class="grading-section">
+                        <div class="grading-inputs">
+                            <div class="form-group">
+                                <label>Điểm:</label>
+                                <input type="number" id="score-${id}" min="0" max="10" step="0.5" placeholder="0-10">
+                            </div>
+                            <div class="form-group">
+                                <label>Nhận xét:</label>
+                                <textarea id="comment-${id}" placeholder="Nhập nhận xét..."></textarea>
+                            </div>
+                        </div>
+                        <button class="btn" onclick="gradeSubmission('${id}')">Chấm Điểm</button>
+                    </div>
+                `}
+            `;
+            
+            return card;
+        }
+
+        async function gradeSubmission(id) {
+            const scoreInput = document.getElementById('score-' + id);
+            const commentInput = document.getElementById('comment-' + id);
+            
+            if (!scoreInput || !commentInput) {
+                showMessage('teacher-message', 'Không tìm thấy ô nhập liệu!', 'error');
+                return;
+            }
+
+            const score = scoreInput.value;
+            const comment = commentInput.value.trim();
+
+            if (!score || !comment) {
+                showMessage('teacher-message', 'Vui lòng nhập đầy đủ điểm và nhận xét!', 'error');
+                return;
+            }
+
+            const scoreNum = parseFloat(score);
+            if (isNaN(scoreNum) || scoreNum < 0 || scoreNum > 10) {
+                showMessage('teacher-message', 'Điểm phải từ 0 đến 10!', 'error');
+                return;
+            }
+
+            try {
+                const url = `https://burnt-hand-default-rtdb.firebaseio.com/submissions/${id}.json`;
+                const response = await fetch(url);
+                const currentData = await response.json();
+
+                const updatedData = {
+                    ...currentData,
+                    score: scoreNum,
+                    comment: comment
+                };
+
+                const updateResponse = await fetch(url, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (updateResponse.ok) {
+                    showMessage('teacher-message', 'Chấm điểm thành công! ✓', 'success');
+                    loadSubmissions();
+                } else {
+                    showMessage('teacher-message', 'Có lỗi xảy ra!', 'error');
+                }
+            } catch (error) {
+                showMessage('teacher-message', 'Không thể kết nối đến server!', 'error');
+            }
+        }
+
+        async function editSubmission(id) {
+            try {
+                const url = `https://burnt-hand-default-rtdb.firebaseio.com/submissions/${id}.json`;
+                const response = await fetch(url);
+                const currentData = await response.json();
+
+                const card = document.querySelector(`[data-id="${id}"]`);
+                if (!card) return;
+
+                card.innerHTML = `
+                    <div class="submission-header">
+                        <div class="submission-name">${currentData.name}</div>
+                        <div class="submission-status status-pending">
+                            ✏️ Đang chỉnh sửa
+                        </div>
+                    </div>
+                    
+                    <div class="answer-section">
+                        <div class="answer-label">Câu 1:</div>
+                        <div class="answer-content">${currentData.answer1}</div>
+                    </div>
+                    
+                    <div class="answer-section">
+                        <div class="answer-label">Bài 2:</div>
+                        <div class="answer-content">${currentData.answer2}</div>
+                    </div>
+                    
+                    <div class="grading-section">
+                        <div class="grading-inputs">
+                            <div class="form-group">
+                                <label>Điểm:</label>
+                                <input type="number" id="score-${id}" min="0" max="10" step="0.5" placeholder="0-10" value="${currentData.score || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label>Nhận xét:</label>
+                                <textarea id="comment-${id}" placeholder="Nhập nhận xét...">${currentData.comment || ''}</textarea>
+                            </div>
+                        </div>
+                        <button class="btn" onclick="gradeSubmission('${id}')">Cập Nhật Điểm</button>
+                        <button class="btn btn-secondary" style="margin-left: 10px;" onclick="loadSubmissions()">Hủy</button>
+                    </div>
+                `;
+            } catch (error) {
+                showMessage('teacher-message', 'Không thể tải thông tin bài làm!', 'error');
+            }
+        }
+
+        async function loadResults() {
+            const listElement = document.getElementById('results-list');
+            listElement.innerHTML = '<div class="loading">Đang tải kết quả...</div>';
+
+            try {
+                const response = await fetch(FIREBASE_URL.replace('.json', '/.json'));
+                const data = await response.json();
+
+                if (!data) {
+                    listElement.innerHTML = '<p style="text-align: center; color: var(--color-text-secondary);">Chưa có kết quả nào.</p>';
+                    return;
+                }
+
+                listElement.innerHTML = '';
+                
+                for (const [id, submission] of Object.entries(data)) {
+                    const card = createResultCard(submission);
+                    listElement.appendChild(card);
+                }
+            } catch (error) {
+                listElement.innerHTML = '<p style="color: var(--color-error);">Không thể tải dữ liệu!</p>';
+            }
+        }
+
+        function createResultCard(submission) {
+            const card = document.createElement('div');
+            card.className = 'submission-card';
+            
+            const isGraded = submission.score !== null && submission.score !== undefined;
+            
+            card.innerHTML = `
+                <div class="submission-header">
+                    <div class="submission-name">${submission.name}</div>
+                    <div class="submission-status ${isGraded ? 'status-graded' : 'status-pending'}">
+                        ${isGraded ? '✓ Đã có điểm' : '⏳ Đang chờ'}
+                    </div>
+                </div>
+                
+                <div class="answer-section">
+                    <div class="answer-label">Câu 1:</div>
+                    <div class="answer-content">${submission.answer1}</div>
+                </div>
+                
+                <div class="answer-section">
+                    <div class="answer-label">Bài 2:</div>
+                    <div class="answer-content">${submission.answer2}</div>
+                </div>
+                
+                ${isGraded ? `
+                    <div class="grading-section">
+                        <div class="score-display">Điểm: ${submission.score}</div>
+                        <div class="comment-display">📝 ${submission.comment}</div>
+                    </div>
+                ` : `
+                    <div style="text-align: center; padding: 20px; color: var(--color-text-secondary);">
+                        ⏳ Bài làm đang chờ giáo viên chấm điểm
+                    </div>
+                `}
+            `;
+            
+            return card;
+        }
+    </script>
+</body>
+</html>
+
